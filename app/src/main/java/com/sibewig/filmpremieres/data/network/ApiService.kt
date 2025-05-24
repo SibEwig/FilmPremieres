@@ -9,27 +9,34 @@ import retrofit2.http.Query
 interface ApiService {
 
     @GET("movie")
-//    &selectFields=type
     suspend fun loadMovies(
         @Query("page") page: Int,
         @Query("limit") limit: Int = LIMIT,
         @Query("sortField") sortField: String = SORT_FIELD,
         @Query("sortType") sortType: Int = SORT_TYPE,
-        @Query("notNullFields") notNull1: String = NOT_NULL_PREMIERE_RUSSIA,
+        @Query("notNullFields") notNullFields: List<String> = listOf(
+            NOT_NULL_PREMIERE_RUSSIA,
+            NOT_NULL_NAME
+        ),
         @Query("notNullFields") notNull2: String = NOT_NULL_NAME,
         @Query("type") type: String = TYPE,
         @Query("year") year: Int = YEAR,
+        @Query("selectFields") selectFields: List<String> = listOf(
+            SELECT_FIELD_ID,
+            SELECT_FIELD_NAME,
+            SELECT_FIELD_DESCRIPTION,
+            SELECT_FIELD_POSTER,
+            SELECT_FIELD_VIDEOS,
+            SELECT_FIELD_PREMIERE
+        ),
         @Query("token") token: String = TOKEN,
-        @Query("selectFields") selectFields1: String = SELECT_FIELD_ID,
-        @Query("selectFields") selectFields2: String = SELECT_FIELD_NAME,
-        @Query("selectFields") selectFields3: String = SELECT_FIELD_DESCRIPTION,
-        @Query("selectFields") selectFields4: String = SELECT_FIELD_POSTER,
-        @Query("selectFields") selectFields5: String = SELECT_FIELD_VIDEOS,
-        @Query("selectFields") selectFields6: String = SELECT_FIELD_PREMIERE
     ): MovieResponse
 
     @GET("movie/{id}?token=VNHCQ2C-H684JSE-J3N4HT7-MRS78CB")
-    suspend fun loadMovie(@Path("id") id: Int): MovieDto
+    suspend fun loadMovie(
+        @Path("id") id: Int,
+        @Query("token") token: String = TOKEN
+    ): MovieDto
 
     companion object {
 

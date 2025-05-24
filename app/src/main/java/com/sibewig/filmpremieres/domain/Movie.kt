@@ -6,5 +6,6 @@ data class Movie(
     val year: Int,
     val poster: String?,
     val description: String,
-    val premiere: String
+    val premiere: String,
+    val trailers: List<Trailer>?
 )

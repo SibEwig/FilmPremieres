@@ -9,7 +9,7 @@ import com.sibewig.filmpremieres.R
 import com.sibewig.filmpremieres.databinding.MovieItemBinding
 import com.sibewig.filmpremieres.domain.Movie
 
-class MovieAdapter: ListAdapter<Movie, MovieViewHolder>(MovieDiffCallback) {
+class MovieAdapter : ListAdapter<Movie, MovieViewHolder>(MovieDiffCallback) {
 
     var onReachEndListener: (() -> Unit)? = null
 
@@ -36,6 +36,10 @@ class MovieAdapter: ListAdapter<Movie, MovieViewHolder>(MovieDiffCallback) {
                             binding.imageViewPoster.setImageDrawable(it)
                         }
                 }
+                binding.textViewTitle.text =
+                    holder.itemView.context.getString(
+                        R.string.name_and_release_date, movie.name, movie.premiere
+                    )
             }
         }
         if (position >= currentList.size - 10) {

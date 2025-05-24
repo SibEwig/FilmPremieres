@@ -14,5 +14,7 @@ data class MovieDto(
     @SerializedName("description")
     val description: String?,
     @SerializedName("premiere")
-    val premiere: PremiereDto
+    val premiere: PremiereDto,
+    @SerializedName("trailers")
+    val trailers: List<TrailerDto>?
 )
