@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">FilmPremieres</string>
     <string name="name_and_release_date">%1$s (Премьера: %2$s)</string>
+    <string name="premiere_date">c %1$s</string>
+    <string name="date_sample">с 16.08.2080</string>
 </resources>

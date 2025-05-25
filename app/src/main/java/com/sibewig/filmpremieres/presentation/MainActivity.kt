@@ -9,7 +9,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import com.sibewig.filmpremieres.databinding.ActivityMainBinding
-import com.sibewig.filmpremieres.presentation.adapters.MovieAdapter
+import com.sibewig.filmpremieres.presentation.adapters.ListItemAdapter
+import com.sibewig.filmpremieres.presentation.adapters.ListItemAdapter.Companion.VIEW_TYPE_HEADER
+import com.sibewig.filmpremieres.presentation.adapters.ListItemAdapter.Companion.VIEW_TYPE_MOVIE
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,21 +32,36 @@ class MainActivity : AppCompatActivity() {
         ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
     }
 
+    private val adapter = ListItemAdapter()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         component.inject(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(binding.root)
-        val adapter = MovieAdapter()
-        binding.recyclerViewMovie.adapter = adapter
-        binding.recyclerViewMovie.layoutManager = GridLayoutManager(this, 2)
-        adapter.onReachEndListener = {
-            viewModel.loadData()
-        }
+        setUpAdapter()
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.movieListFlow.collect {
                     adapter.submitList(it)
+                }
+            }
+        }
+    }
+
+    private fun setUpAdapter() {
+        val layoutManager = GridLayoutManager(this, 2)
+        binding.recyclerViewMovie.adapter = adapter
+        binding.recyclerViewMovie.layoutManager = layoutManager
+        adapter.onReachEndListener = {
+            viewModel.loadData()
+        }
+        layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+            override fun getSpanSize(position: Int): Int {
+                return when (adapter.getItemViewType(position)) {
+                    VIEW_TYPE_HEADER -> 2
+                    VIEW_TYPE_MOVIE -> 1
+                    else -> 1
                 }
             }
         }

@@ -17,15 +17,13 @@ class MovieMapper @Inject constructor() {
         dto.year,
         dto.poster?.url,
         dto.description ?: EMPTY_DESCRIPTION,
-        mapPremiereDtoDateToString(dto.premiere),
+        mapPremiereDtoDateToLocalDate(dto.premiere),
         dto.trailers?.map { mapTrailerDtoToDomain(it) }
     )
 
-    private fun mapPremiereDtoDateToString(dto: PremiereDto): String {
-        val inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val outputFormatter = DateTimeFormatter.ofPattern("dd.MM.yy")
-        val date = LocalDate.parse(dto.date.substring(0, 10), inputFormatter)
-        return date.format(outputFormatter)
+    private fun mapPremiereDtoDateToLocalDate(dto: PremiereDto): LocalDate {
+        val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        return LocalDate.parse(dto.date.substring(0, 10), dateFormatter)
     }
 
     private fun mapTrailerDtoToDomain(dto: TrailerDto) = Trailer(dto.name, dto.url)
