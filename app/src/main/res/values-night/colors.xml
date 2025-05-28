@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="movie_title_text">#FFFFFF</color>
+    <color name="movie_text">#FFFFFF</color>
 </resources>

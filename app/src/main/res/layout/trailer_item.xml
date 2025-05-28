@@ -14,15 +14,24 @@
         android:background="@android:color/darker_gray"
         android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/textViewHeader"
-        android:layout_width="wrap_content"
-        android:padding="8dp"
-        android:layout_height="wrap_content"
-        tools:text="Май 2025"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textStyle="bold"
-        android:textColor="@android:color/white"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            tools:text="какой-то интересный трейлер"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:id="@+id/textViewTrailer"
+            />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginEnd="14dp"
+            app:srcCompat="@android:drawable/ic_media_play" />
+
+
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

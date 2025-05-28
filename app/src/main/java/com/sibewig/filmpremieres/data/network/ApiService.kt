@@ -20,7 +20,7 @@ interface ApiService {
         ),
         @Query("notNullFields") notNull2: String = NOT_NULL_NAME,
         @Query("type") type: String = TYPE,
-        @Query("year") year: Int = YEAR,
+        @Query("premiere.russia") year: String = PREMIERE_RUSSIA,
         @Query("selectFields") selectFields: List<String> = listOf(
             SELECT_FIELD_ID,
             SELECT_FIELD_NAME,
@@ -32,7 +32,7 @@ interface ApiService {
         @Query("token") token: String = TOKEN,
     ): MovieResponse
 
-    @GET("movie/{id}?token=VNHCQ2C-H684JSE-J3N4HT7-MRS78CB")
+    @GET("movie/{id}")
     suspend fun loadMovie(
         @Path("id") id: Int,
         @Query("token") token: String = TOKEN
@@ -46,7 +46,7 @@ interface ApiService {
         private const val NOT_NULL_PREMIERE_RUSSIA = "premiere.russia"
         private const val NOT_NULL_NAME = "name"
         private const val TYPE = "!tv-series"
-        private const val YEAR = 2025
+        private const val PREMIERE_RUSSIA = "01.01.2025-31.12.2025"
         private const val TOKEN = "VNHCQ2C-H684JSE-J3N4HT7-MRS78CB"
         private const val SELECT_FIELD_PREMIERE = "premiere"
         private const val SELECT_FIELD_VIDEOS = "videos"

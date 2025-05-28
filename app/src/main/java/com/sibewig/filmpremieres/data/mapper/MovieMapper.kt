@@ -18,7 +18,7 @@ class MovieMapper @Inject constructor() {
         dto.poster?.url,
         dto.description ?: EMPTY_DESCRIPTION,
         mapPremiereDtoDateToLocalDate(dto.premiere),
-        dto.trailers?.map { mapTrailerDtoToDomain(it) }
+        dto.trailerList?.trailers?.map { mapTrailerDtoToDomain(it) }
     )
 
     private fun mapPremiereDtoDateToLocalDate(dto: PremiereDto): LocalDate {

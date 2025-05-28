@@ -1,9 +1,9 @@
 package com.sibewig.filmpremieres.presentation.adapters
 
 import androidx.recyclerview.widget.DiffUtil
-import com.sibewig.filmpremieres.presentation.MovieListItem
+import com.sibewig.filmpremieres.domain.MovieListItem
 
-object ListItemDiffCallback : DiffUtil.ItemCallback<MovieListItem>() {
+object MovieListItemDiffCallback : DiffUtil.ItemCallback<MovieListItem>() {
 
     override fun areItemsTheSame(oldItem: MovieListItem, newItem: MovieListItem): Boolean {
         return if (oldItem is MovieListItem.Header && newItem is MovieListItem.Header) {

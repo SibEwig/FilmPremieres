@@ -6,7 +6,6 @@ import com.bumptech.glide.Glide
 import com.sibewig.filmpremieres.R
 import com.sibewig.filmpremieres.databinding.MovieItemBinding
 import com.sibewig.filmpremieres.domain.Movie
-import java.time.format.DateTimeFormatter
 
 class MovieViewHolder(private val binding: MovieItemBinding) :
     RecyclerView.ViewHolder(binding.root) {
@@ -24,10 +23,6 @@ class MovieViewHolder(private val binding: MovieItemBinding) :
                     }
             }
             textViewTitle.text = movie.name
-            val formatter = DateTimeFormatter.ofPattern("dd.MM.yy")
-            val formattedDate = movie.premiere.format(formatter)
-            textViewPremiere.text =
-                itemView.context.getString(R.string.premiere_date, formattedDate)
         }
     }
 }

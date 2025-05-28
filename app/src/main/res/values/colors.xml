@@ -2,5 +2,6 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="movie_title_text">#000000</color>
+    <color name="movie_text">#000000</color>
+    <color name="background_light_gray">#DCDCDC</color>
 </resources>

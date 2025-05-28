@@ -6,11 +6,12 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.sibewig.filmpremieres.databinding.HeaderItemBinding
 import com.sibewig.filmpremieres.databinding.MovieItemBinding
-import com.sibewig.filmpremieres.presentation.MovieListItem
+import com.sibewig.filmpremieres.domain.MovieListItem
 
-class ListItemAdapter : ListAdapter<MovieListItem, RecyclerView.ViewHolder>(ListItemDiffCallback) {
+class MovieListItemAdapter : ListAdapter<MovieListItem, RecyclerView.ViewHolder>(MovieListItemDiffCallback) {
 
     var onReachEndListener: (() -> Unit)? = null
+    var onItemClickListener: ((Int) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
@@ -41,7 +42,12 @@ class ListItemAdapter : ListAdapter<MovieListItem, RecyclerView.ViewHolder>(List
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (val item = getItem(position)) {
             is MovieListItem.Header -> (holder as HeaderViewHolder).bind(item)
-            is MovieListItem.MovieItem -> (holder as MovieViewHolder).bind(item.movie)
+            is MovieListItem.MovieItem -> {
+                (holder as MovieViewHolder).bind(item.movie)
+                holder.itemView.setOnClickListener {
+                    onItemClickListener?.invoke(item.movie.id)
+                }
+            }
         }
         if (position >= currentList.size - 10) {
             onReachEndListener?.invoke()

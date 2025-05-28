@@ -30,11 +30,14 @@ class RepositoryImpl @Inject constructor(
     override suspend fun loadMovieList() {
         try {
             val dtoList = apiService.loadMovies(page).movies
+            for (movie in dtoList) {
+                Log.d(TAG, "Trailers (id: ${movie.id}): ${movie.trailerList?.toString()}")
+            }
             val movies = dtoList.map { mapper.mapMovieDtoToDomain(it) }
             if (movies.isNotEmpty()) {
                 movieList.addAll(movies)
                 _movieListFlow.value = movieList.toList()
-                Log.d(TAG, "Loaded page: $page")
+
                 page++
             }
         } catch (e: Exception) {

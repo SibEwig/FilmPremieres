@@ -1,6 +1,4 @@
-package com.sibewig.filmpremieres.presentation
-
-import com.sibewig.filmpremieres.domain.Movie
+package com.sibewig.filmpremieres.domain
 
 sealed class MovieListItem {
     data class Header(val month: String) : MovieListItem()

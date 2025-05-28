@@ -29,18 +29,6 @@
                 android:contentDescription="@null"
                 android:scaleType="centerCrop"
                 tools:src="@tools:sample/avatars" />
-
-            <TextView
-                android:id="@+id/textViewPremiere"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|center"
-                android:background="@android:color/darker_gray"
-                android:text="@string/date_sample"
-                android:padding="1dp"
-                android:textColor="@android:color/white"
-                android:textSize="12sp"
-                android:textStyle="bold" />
         </FrameLayout>
     </androidx.cardview.widget.CardView>
 
@@ -51,7 +39,7 @@
         android:layout_marginStart="8dp"
         android:ellipsize="end"
         android:maxLines="2"
-        android:textColor="@color/movie_title_text"
+        android:textColor="@color/movie_text"
         android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
