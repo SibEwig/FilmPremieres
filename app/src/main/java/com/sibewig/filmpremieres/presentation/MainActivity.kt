@@ -1,6 +1,8 @@
 package com.sibewig.filmpremieres.presentation
 
 import android.os.Bundle
+import android.view.View
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -42,16 +44,35 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(binding.root)
         setUpRecyclerView()
+        binding.floatingButtonSync.setOnClickListener {
+            viewModel.loadData()
+            binding.floatingButtonSync.visibility = View.GONE
+        }
+        observeViewModelState()
+    }
+
+    private fun observeViewModelState() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collect {
-                    when(it) {
+                    when (it) {
                         is MainActivityState.Loading -> {
                             binding.progressBar.isVisible = true
                         }
+
                         is MainActivityState.Content -> {
                             binding.progressBar.isVisible = false
                             adapter.submitList(it.content)
+                        }
+
+                        is MainActivityState.Error -> {
+                            binding.floatingButtonSync.visibility = View.VISIBLE
+                            binding.progressBar.isVisible = false
+                            Toast.makeText(
+                                this@MainActivity,
+                                it.error,
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                 }

@@ -20,7 +20,7 @@ interface ApiService {
         ),
         @Query("notNullFields") notNull2: String = NOT_NULL_NAME,
         @Query("type") type: String = TYPE,
-        @Query("premiere.russia") year: String = PREMIERE_RUSSIA,
+        @Query("premiere.russia") premiereRange: String = PREMIERE_RUSSIA,
         @Query("selectFields") selectFields: List<String> = listOf(
             SELECT_FIELD_ID,
             SELECT_FIELD_NAME,

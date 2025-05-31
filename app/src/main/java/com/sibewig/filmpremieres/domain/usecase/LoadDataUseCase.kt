@@ -1,5 +1,6 @@
-package com.sibewig.filmpremieres.domain
+package com.sibewig.filmpremieres.domain.usecase
 
+import com.sibewig.filmpremieres.domain.MovieRepository
 import javax.inject.Inject
 
 class LoadDataUseCase @Inject constructor(
