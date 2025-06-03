@@ -21,6 +21,7 @@ import com.sibewig.filmpremieres.databinding.ActivityMovieDetailBinding
 import com.sibewig.filmpremieres.domain.Movie
 import com.sibewig.filmpremieres.domain.MovieDetailActivityState
 import com.sibewig.filmpremieres.presentation.adapters.TrailerAdapter
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -42,6 +43,8 @@ class MovieDetailActivity : AppCompatActivity() {
         ViewModelProvider(this, viewModelFactory)[MovieDetailViewModel::class.java]
     }
 
+    private var currentMovie: Movie? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         component.inject(this)
         super.onCreate(savedInstanceState)
@@ -52,6 +55,7 @@ class MovieDetailActivity : AppCompatActivity() {
         observeMovieInfo(adapter)
         setupClickListeners(movieId, adapter)
         viewModel.loadMovieInfo(movieId)
+        viewModel.checkIsFavourite(movieId)
     }
 
     private fun setupClickListeners(movieId: Int, adapter: TrailerAdapter) {
@@ -65,6 +69,11 @@ class MovieDetailActivity : AppCompatActivity() {
         binding.floatingButtonSync.setOnClickListener {
             viewModel.loadMovieInfo(movieId)
         }
+        binding.imageViewStar.setOnClickListener {
+            currentMovie?.let {
+                viewModel.toggleFavourite(it)
+            }
+        }
     }
 
     private fun parseIntent() = intent.getIntExtra(EXTRA_MOVIE_ID, 0)
@@ -72,28 +81,45 @@ class MovieDetailActivity : AppCompatActivity() {
     private fun observeMovieInfo(adapter: TrailerAdapter) {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.state.collect {
-                    Log.d(TAG, "Collected in activity: $it")
-                    when (it) {
-                        is MovieDetailActivityState.Content -> {
-                            binding.progressBar.isVisible = false
-                            bindMovieInfo(it.content)
-                            adapter.submitList(it.content.trailers)
-                        }
+                launch {
+                    viewModel.state.collect {
+                        Log.d(TAG, "Collected in activity: $it")
+                        when (it) {
+                            is MovieDetailActivityState.Content -> {
+                                currentMovie = it.content
+                                bindMovieInfo(it.content)
+                                adapter.submitList(it.content.trailers)
+                                delay(500)
+                                binding.progressBar.isVisible = false
+                            }
 
-                        is MovieDetailActivityState.Error -> {
-                            binding.floatingButtonSync.visibility = View.VISIBLE
-                            binding.progressBar.isVisible = false
-                            Toast.makeText(
-                                this@MovieDetailActivity,
-                                it.error,
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
+                            is MovieDetailActivityState.Error -> {
+                                binding.floatingButtonSync.visibility = View.VISIBLE
+                                Toast.makeText(
+                                    this@MovieDetailActivity,
+                                    it.error,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                delay(500)
+                                binding.progressBar.isVisible = false
+                            }
 
-                        MovieDetailActivityState.Loading -> {
-                            binding.progressBar.isVisible = true
+                            MovieDetailActivityState.Loading -> {
+                                binding.progressBar.isVisible = true
+                            }
                         }
+                    }
+                }
+                launch {
+                    viewModel.isFavourite.collect { isFavourite ->
+                        val drawableRes = if (isFavourite == true) {
+                            android.R.drawable.star_big_on
+                        } else {
+                            android.R.drawable.star_big_off
+                        }
+                        binding.imageViewStar.setImageDrawable(
+                            ContextCompat.getDrawable(this@MovieDetailActivity, drawableRes)
+                        )
                     }
                 }
             }

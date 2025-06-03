@@ -1,7 +1,9 @@
 package com.sibewig.filmpremieres.di
 
+import android.app.Application
 import com.sibewig.filmpremieres.presentation.MainActivity
 import com.sibewig.filmpremieres.presentation.MovieDetailActivity
+import dagger.BindsInstance
 import dagger.Component
 
 @ApplicationScope
@@ -20,6 +22,8 @@ interface ApplicationComponent {
     @Component.Factory
     interface Factory {
 
-        fun create(): ApplicationComponent
+        fun create(
+            @BindsInstance application: Application
+        ): ApplicationComponent
     }
 }

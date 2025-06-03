@@ -1,5 +1,6 @@
 package com.sibewig.filmpremieres.data.mapper
 
+import com.sibewig.filmpremieres.data.database.FavouriteEntity
 import com.sibewig.filmpremieres.data.network.model.MovieDto
 import com.sibewig.filmpremieres.data.network.model.PremiereDto
 import com.sibewig.filmpremieres.data.network.model.TrailerDto
@@ -25,6 +26,23 @@ class MovieMapper @Inject constructor() {
         val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         return LocalDate.parse(dto.date.substring(0, 10), dateFormatter)
     }
+
+    fun mapFavouriteEntityToMovie(favouriteEntity: FavouriteEntity) = Movie(
+        favouriteEntity.id,
+        favouriteEntity.name,
+        0,
+        favouriteEntity.poster,
+        "",
+        favouriteEntity.premiere,
+        null
+    )
+
+    fun mapMovieToFavourite(movie: Movie) = FavouriteEntity(
+        movie.id,
+        movie.name,
+        movie.poster,
+        movie.premiere
+    )
 
     private fun mapTrailerDtoToDomain(dto: TrailerDto) = Trailer(dto.name, dto.url)
 

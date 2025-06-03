@@ -1,5 +1,6 @@
 package com.sibewig.filmpremieres.presentation.adapters
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
@@ -50,6 +51,7 @@ class MovieListItemAdapter : ListAdapter<MovieListItem, RecyclerView.ViewHolder>
             }
         }
         if (position >= currentList.size - 10) {
+            Log.d(TAG, "onReachEndListener invoked")
             onReachEndListener?.invoke()
         }
     }
@@ -62,6 +64,7 @@ class MovieListItemAdapter : ListAdapter<MovieListItem, RecyclerView.ViewHolder>
     }
 
     companion object {
+        private const val TAG = "MovieListItemAdapter"
         const val VIEW_TYPE_HEADER = 0
         const val VIEW_TYPE_MOVIE = 1
     }

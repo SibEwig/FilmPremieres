@@ -8,6 +8,6 @@ import com.sibewig.filmpremieres.di.DaggerApplicationComponent
 class FilmPremieresApp: Application() {
 
     val component by lazy {
-        DaggerApplicationComponent.factory().create()
+        DaggerApplicationComponent.factory().create(this)
     }
 }

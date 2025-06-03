@@ -1,6 +1,7 @@
 package com.sibewig.filmpremieres.data.repository
 
 import android.util.Log
+import com.sibewig.filmpremieres.data.database.FavouriteDao
 import com.sibewig.filmpremieres.data.mapper.MovieMapper
 import com.sibewig.filmpremieres.data.network.ApiService
 import com.sibewig.filmpremieres.domain.Movie
@@ -17,14 +18,14 @@ import javax.inject.Inject
 
 class RepositoryImpl @Inject constructor(
     private val mapper: MovieMapper,
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val favouriteDao: FavouriteDao
 ) : MovieRepository {
 
     private val movieList = mutableListOf<Movie>()
 
-    private val _movieListFlow = MutableStateFlow<List<Movie>>(emptyList())
-    override val movieListFlow: StateFlow<List<Movie>>
-        get() = _movieListFlow.asStateFlow()
+    private val _movieListFlow = MutableSharedFlow<List<Movie>>(replay = 1)
+    override val movieListFlow: SharedFlow<List<Movie>> = _movieListFlow
 
     private val _movieInfoFlow = MutableStateFlow<Movie?>(null)
     override val movieInfoFlow: StateFlow<Movie?>
@@ -34,7 +35,36 @@ class RepositoryImpl @Inject constructor(
     override val errorFlow: SharedFlow<Unit>
         get() = _errorFlow.asSharedFlow()
 
+    private val _fullListLoaded = MutableStateFlow(false)
+    override val fullListLoaded: StateFlow<Boolean>
+        get() = _fullListLoaded.asStateFlow()
+
     private var page = INITIAL_PAGE
+    private var totalMovies = 0
+    private val premiereDateRange: String = generatePremiereRange()
+
+    override suspend fun loadMovieList() {
+        if (totalMovies == 0 || movieList.size < totalMovies) {
+            try {
+                val response = apiService.loadMovies(page = page, premiereRange = premiereDateRange)
+                val dtoList = response.movies
+                totalMovies = response.total
+                Log.d(TAG, "Total movie list size: $totalMovies")
+                val movies = dtoList.map { mapper.mapMovieDtoToDomain(it) }
+                if (movies.isNotEmpty()) {
+                    movieList.addAll(movies)
+                    _movieListFlow.emit(movieList.toList())
+                    page++
+                }
+            } catch (e: Exception) {
+                _errorFlow.emit(Unit)
+                Log.e(TAG, "Error loading movie list", e)
+            }
+        } else {
+            _fullListLoaded.value = true
+            _movieListFlow.emit(movieList.toList())
+        }
+    }
 
     override suspend fun loadMovieInfo(id: Int) {
         try {
@@ -51,28 +81,28 @@ class RepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getFavouriteList() {
+        _movieListFlow.emit(
+            favouriteDao.getAllFavorites().map { mapper.mapFavouriteEntityToMovie(it) }
+        )
+    }
+
+    override suspend fun addToFavorites(movie: Movie) {
+        favouriteDao.addToFavorites(mapper.mapMovieToFavourite(movie))
+    }
+
+    override suspend fun removeFromFavorites(movie: Movie) {
+        favouriteDao.removeFromFavorites(mapper.mapMovieToFavourite(movie))
+    }
+
+    override suspend fun isFavourite(movieId: Int) = favouriteDao.isFavorite(movieId)
+
     private fun generatePremiereRange(): String {
         val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
         val startDate = LocalDate.now().withDayOfMonth(1)
         val endDate = startDate.plusMonths(12).minusDays(1)
         return "${startDate.format(formatter)}-${endDate.format(formatter)}".also {
             Log.d(TAG, "Premiere range: $it")
-        }
-    }
-
-    override suspend fun loadMovieList() {
-        val premiereRange = generatePremiereRange()
-        try {
-            val dtoList = apiService.loadMovies(page = page, premiereRange = premiereRange).movies
-            val movies = dtoList.map { mapper.mapMovieDtoToDomain(it) }
-            if (movies.isNotEmpty()) {
-                movieList.addAll(movies)
-                _movieListFlow.value = movieList.toList()
-                page++
-            }
-        } catch (e: Exception) {
-            _errorFlow.emit(Unit)
-            Log.e(TAG, "Error loading movie list", e)
         }
     }
 

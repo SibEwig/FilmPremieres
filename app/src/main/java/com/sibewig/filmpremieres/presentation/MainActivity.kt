@@ -16,6 +16,7 @@ import com.sibewig.filmpremieres.domain.MainActivityState
 import com.sibewig.filmpremieres.presentation.adapters.MovieListItemAdapter
 import com.sibewig.filmpremieres.presentation.adapters.MovieListItemAdapter.Companion.VIEW_TYPE_HEADER
 import com.sibewig.filmpremieres.presentation.adapters.MovieListItemAdapter.Companion.VIEW_TYPE_MOVIE
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,6 +29,8 @@ class MainActivity : AppCompatActivity() {
     private val component by lazy {
         (application as FilmPremieresApp).component
     }
+
+    private var isFavouriteMode = false
 
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
@@ -44,35 +47,59 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(binding.root)
         setUpRecyclerView()
+        setUpClickListeners()
+        observeViewModelState()
+    }
+
+    private fun setUpClickListeners() {
         binding.floatingButtonSync.setOnClickListener {
             viewModel.loadData()
             binding.floatingButtonSync.visibility = View.GONE
         }
-        observeViewModelState()
+        binding.floatingButtonFavourites.setOnClickListener {
+            isFavouriteMode = !isFavouriteMode
+            viewModel.setFavouriteMode(isFavouriteMode)
+            if (isFavouriteMode) {
+                viewModel.getFavouriteList()
+            } else {
+                viewModel.loadData()
+            }
+        }
     }
 
     private fun observeViewModelState() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.state.collect {
-                    when (it) {
-                        is MainActivityState.Loading -> {
-                            binding.progressBar.isVisible = true
-                        }
+                launch {
+                    viewModel.state.collect {
+                        when (it) {
+                            is MainActivityState.Loading -> {
+                                binding.progressBar.isVisible = true
+                            }
 
-                        is MainActivityState.Content -> {
-                            binding.progressBar.isVisible = false
-                            adapter.submitList(it.content)
-                        }
+                            is MainActivityState.Content -> {
+                                adapter.submitList(it.content)
+                                delay(500)
+                                binding.progressBar.isVisible = false
+                            }
 
-                        is MainActivityState.Error -> {
-                            binding.floatingButtonSync.visibility = View.VISIBLE
-                            binding.progressBar.isVisible = false
-                            Toast.makeText(
-                                this@MainActivity,
-                                it.error,
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            is MainActivityState.Error -> {
+                                binding.floatingButtonSync.visibility = View.VISIBLE
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    it.error,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                delay(500)
+                                binding.progressBar.isVisible = false
+                            }
+                        }
+                    }
+                }
+                launch {
+                    viewModel.fullListLoaded.collect {fullListLoaded ->
+                        if (fullListLoaded) {
+                            adapter.onReachEndListener = null
                         }
                     }
                 }
@@ -100,6 +127,13 @@ class MainActivity : AppCompatActivity() {
                     else -> 1
                 }
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (isFavouriteMode) {
+            viewModel.getFavouriteList()
         }
     }
 
