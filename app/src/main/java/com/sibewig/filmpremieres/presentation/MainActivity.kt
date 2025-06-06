@@ -1,16 +1,21 @@
 package com.sibewig.filmpremieres.presentation
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
+import com.sibewig.filmpremieres.R
 import com.sibewig.filmpremieres.databinding.ActivityMainBinding
 import com.sibewig.filmpremieres.domain.MainActivityState
 import com.sibewig.filmpremieres.presentation.adapters.MovieListItemAdapter
@@ -41,6 +46,8 @@ class MainActivity : AppCompatActivity() {
 
     private val adapter = MovieListItemAdapter()
 
+    private var isMenuOpen = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         component.inject(this)
         super.onCreate(savedInstanceState)
@@ -51,19 +58,63 @@ class MainActivity : AppCompatActivity() {
         observeViewModelState()
     }
 
+    private fun toggleFabMenu() {
+        isMenuOpen = !isMenuOpen
+        val visibility = if (isMenuOpen) View.VISIBLE else View.GONE
+        binding.fabSearch.visibility = visibility
+        binding.fabFavourites.visibility = visibility
+    }
+
     private fun setUpClickListeners() {
-        binding.floatingButtonSync.setOnClickListener {
-            viewModel.loadData()
-            binding.floatingButtonSync.visibility = View.GONE
-        }
-        binding.floatingButtonFavourites.setOnClickListener {
-            isFavouriteMode = !isFavouriteMode
-            viewModel.setFavouriteMode(isFavouriteMode)
-            if (isFavouriteMode) {
-                viewModel.getFavouriteList()
-            } else {
+        with(binding) {
+            fabSearch.setOnClickListener {
                 viewModel.loadData()
+                fabSearch.visibility = View.GONE
             }
+            fabFavourites.setOnClickListener {
+                isFavouriteMode = !isFavouriteMode
+                viewModel.setFavouriteMode(isFavouriteMode)
+                if (isFavouriteMode) {
+                    viewModel.getFavouriteList()
+                } else {
+                    viewModel.loadData()
+                }
+            }
+            fabMain.setOnClickListener {
+                toggleFabMenu()
+            }
+            fabSearch.setOnClickListener {
+                searchView.visibility = View.VISIBLE
+                searchView.onActionViewExpanded()
+                searchView.postDelayed({
+                    val searchEditText = searchView.findViewById<EditText>(
+                        androidx.appcompat.R.id.search_src_text
+                    )
+                    searchEditText.requestFocus()
+                    searchEditText.setSelection(searchEditText.text.length)
+                    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.showSoftInput(searchEditText, InputMethodManager.SHOW_IMPLICIT)
+                }, 150)
+            }
+            searchView.setOnQueryTextListener(object : OnQueryTextListener {
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    return false
+                }
+
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    if (query == null) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            getString(R.string.empty_search_query),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        viewModel.searchMovie(query)
+                    }
+                    return true
+                }
+            })
         }
     }
 
@@ -84,7 +135,7 @@ class MainActivity : AppCompatActivity() {
                             }
 
                             is MainActivityState.Error -> {
-                                binding.floatingButtonSync.visibility = View.VISIBLE
+                                binding.fabRetry.visibility = View.VISIBLE
                                 Toast.makeText(
                                     this@MainActivity,
                                     it.error,

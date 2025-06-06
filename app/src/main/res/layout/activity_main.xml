@@ -7,14 +7,27 @@
     android:layout_height="match_parent"
     tools:context=".presentation.MainActivity">
 
+    <androidx.appcompat.widget.SearchView
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="22dp"
+        android:inputType="textCapSentences"
+        android:queryHint="Поиск фильма..."
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <androidx.recyclerview.widget.RecyclerView
-        android:layout_marginTop="26dp"
         android:id="@+id/recyclerViewMovie"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:listitem="@layout/movie_item"
+        android:layout_height="0dp"
+        android:layout_marginTop="36dp"
+        android:clipToPadding="false"
         android:paddingBottom="128dp"
-        android:clipToPadding="false"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@id/searchView"
+        tools:listitem="@layout/movie_item" />
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -22,31 +35,55 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         android:visibility="gone"
-        />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabRetry"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="16dp"
         android:contentDescription="@null"
-        app:srcCompat="@android:drawable/btn_star_big_on"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@android:drawable/ic_popup_sync" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabFavourites"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="8dp"
+        android:contentDescription="@null"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/fabMain"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@android:drawable/btn_star_big_on" />
+
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabSearch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:clickable="true"
+        android:contentDescription="@null"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/fabFavourites"
+        app:layout_constraintStart_toStartOf="@+id/fabFavourites"
+        app:srcCompat="@android:drawable/ic_menu_search" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabMain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:contentDescription="Меню"
+        android:tint="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_margin="16dp"
-        android:id="@+id/floatingButtonFavourites"
-        />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingButtonSync"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:contentDescription="@null"
-        app:srcCompat="@android:drawable/ic_popup_sync"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:visibility="gone"/>
+        app:srcCompat="@drawable/ic_more_horiz" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

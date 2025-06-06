@@ -11,6 +11,7 @@ import com.sibewig.filmpremieres.domain.usecase.GetFavouriteListUseCase
 import com.sibewig.filmpremieres.domain.usecase.GetFullListLoadedUseCase
 import com.sibewig.filmpremieres.domain.usecase.GetMovieListFlowUseCase
 import com.sibewig.filmpremieres.domain.usecase.LoadDataUseCase
+import com.sibewig.filmpremieres.domain.usecase.SearchMovieUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.map
@@ -24,7 +25,8 @@ class MainViewModel @Inject constructor(
     private val loadDataUseCase: LoadDataUseCase,
     private val getErrorFlowUseCase: GetErrorFlowUseCase,
     private val getFavouriteListUseCase: GetFavouriteListUseCase,
-    private val getFullListLoadedUseCase: GetFullListLoadedUseCase
+    private val getFullListLoadedUseCase: GetFullListLoadedUseCase,
+    private val searchMovieUseCase: SearchMovieUseCase
 ) : ViewModel() {
 
     private val loadingFlow = MutableSharedFlow<MainActivityState.Loading>()
@@ -61,6 +63,12 @@ class MainViewModel @Inject constructor(
     fun getFavouriteList() {
         viewModelScope.launch {
             getFavouriteListUseCase()
+        }
+    }
+
+    fun searchMovie(query: String) {
+        viewModelScope.launch {
+            searchMovieUseCase(query)
         }
     }
 

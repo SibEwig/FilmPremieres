@@ -23,6 +23,7 @@ class RepositoryImpl @Inject constructor(
 ) : MovieRepository {
 
     private val movieList = mutableListOf<Movie>()
+    private val searchResultList = mutableListOf<Movie>()
 
     private val _movieListFlow = MutableSharedFlow<List<Movie>>(replay = 1)
     override val movieListFlow: SharedFlow<List<Movie>> = _movieListFlow
@@ -63,6 +64,25 @@ class RepositoryImpl @Inject constructor(
         } else {
             _fullListLoaded.value = true
             _movieListFlow.emit(movieList.toList())
+        }
+    }
+
+    override suspend fun searchMovie(query: String) {
+        try {
+            val response = apiService.searchMovie(query)
+            val dtoList = response.movies
+//            totalMovies = response.total
+//            Log.d(TAG, "Total movie list size: $totalMovies")
+            Log.d(TAG, "Loaded: ${dtoList.joinToString()}")
+            val movies = dtoList.map { mapper.mapMovieDtoToDomain(it) }
+            if (movies.isNotEmpty()) {
+                searchResultList.addAll(movies)
+                _movieListFlow.emit(searchResultList.toList())
+                page++
+            }
+        } catch (e: Exception) {
+            _errorFlow.emit(Unit)
+            Log.e(TAG, "Error while searching", e)
         }
     }
 

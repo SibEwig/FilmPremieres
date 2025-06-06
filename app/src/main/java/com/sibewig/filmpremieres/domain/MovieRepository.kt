@@ -24,4 +24,6 @@ interface MovieRepository {
     suspend fun removeFromFavorites(movie: Movie)
 
     suspend fun isFavourite(movieId: Int): Boolean
+
+    suspend fun searchMovie(query: String)
 }

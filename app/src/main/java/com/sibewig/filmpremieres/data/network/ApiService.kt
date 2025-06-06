@@ -18,7 +18,6 @@ interface ApiService {
             NOT_NULL_PREMIERE_RUSSIA,
             NOT_NULL_NAME
         ),
-        @Query("notNullFields") notNull2: String = NOT_NULL_NAME,
         @Query("type") type: String = TYPE,
         @Query("premiere.russia") premiereRange: String = PREMIERE_RUSSIA,
         @Query("selectFields") selectFields: List<String> = listOf(
@@ -37,6 +36,13 @@ interface ApiService {
         @Path("id") id: Int,
         @Query("token") token: String = TOKEN
     ): MovieDto
+
+    @GET("movie/search")
+    suspend fun searchMovie(
+        @Query("query") query: String,
+        @Query("token") token: String = TOKEN,
+        @Query("limit") limit: Int = LIMIT
+    ): MovieResponse
 
     companion object {
 

@@ -66,7 +66,7 @@ class MovieDetailActivity : AppCompatActivity() {
                 startActivity(it)
             }
         }
-        binding.floatingButtonSync.setOnClickListener {
+        binding.fabRetry.setOnClickListener {
             viewModel.loadMovieInfo(movieId)
         }
         binding.imageViewStar.setOnClickListener {
@@ -94,7 +94,7 @@ class MovieDetailActivity : AppCompatActivity() {
                             }
 
                             is MovieDetailActivityState.Error -> {
-                                binding.floatingButtonSync.visibility = View.VISIBLE
+                                binding.fabRetry.visibility = View.VISIBLE
                                 Toast.makeText(
                                     this@MovieDetailActivity,
                                     it.error,
