@@ -5,5 +5,6 @@
     <string name="movie_description">Очень захватывающее описание фильма. Очень захватывающее описание фильма. Очень захватывающее описание фильма.</string>
     <string name="date_sample">с 16.08.2080</string>
     <string name="empty_search_query">Введите поисковой запрос</string>
+    <string name="go_back">Go back</string>
 
 </resources>

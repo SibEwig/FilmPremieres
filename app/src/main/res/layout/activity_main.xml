@@ -43,7 +43,8 @@
         android:id="@+id/fabRetry"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_margin="10dp"
+        android:backgroundTint="#6E6E6E"
         android:contentDescription="@null"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -54,8 +55,9 @@
         android:id="@+id/fabFavourites"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="10dp"
         android:layout_marginBottom="8dp"
+        android:backgroundTint="#6E6E6E"
         android:contentDescription="@null"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/fabMain"
@@ -68,6 +70,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
+        android:backgroundTint="#6E6E6E"
         android:clickable="true"
         android:contentDescription="@null"
         android:visibility="gone"
@@ -79,11 +82,25 @@
         android:id="@+id/fabMain"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_margin="10dp"
+        android:backgroundTint="#6E6E6E"
         android:contentDescription="Меню"
-        android:tint="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@drawable/ic_more_horiz" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#6E6E6E"
+        android:layout_margin="10dp"
+        android:clickable="true"
+        android:contentDescription="@string/go_back"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/fabMain"
+        app:layout_constraintStart_toStartOf="@id/fabMain"
+        app:srcCompat="?attr/actionModeCloseDrawable" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

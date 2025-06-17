@@ -41,7 +41,8 @@ class RepositoryImpl @Inject constructor(
         get() = _fullListLoaded.asStateFlow()
 
     private var page = INITIAL_PAGE
-    private var totalMovies = 0
+    private var totalMovies = INITIAL_SIZE
+    private var totalSearchResult = INITIAL_SIZE
     private val premiereDateRange: String = generatePremiereRange()
 
     override suspend fun loadMovieList() {
@@ -68,22 +69,32 @@ class RepositoryImpl @Inject constructor(
     }
 
     override suspend fun searchMovie(query: String) {
-        try {
-            val response = apiService.searchMovie(query)
-            val dtoList = response.movies
-//            totalMovies = response.total
-//            Log.d(TAG, "Total movie list size: $totalMovies")
-            Log.d(TAG, "Loaded: ${dtoList.joinToString()}")
-            val movies = dtoList.map { mapper.mapMovieDtoToDomain(it) }
-            if (movies.isNotEmpty()) {
-                searchResultList.addAll(movies)
-                _movieListFlow.emit(searchResultList.toList())
-                page++
+        if (totalSearchResult == 0 || searchResultList.size < totalSearchResult) {
+            try {
+                val response = apiService.searchMovie(query)
+                val dtoList = response.movies
+                totalSearchResult = response.total
+                Log.d(TAG, "Total movie list size: $totalMovies")
+                Log.d(TAG, "Loaded: ${dtoList.joinToString()}")
+                val movies = dtoList
+                    .map { mapper.mapMovieDtoToDomain(it) }
+                    .filter { it.name.contains(query, ignoreCase = true) }
+                if (movies.isNotEmpty()) {
+                    searchResultList.clear()
+                    _movieListFlow.emit(searchResultList.toList())
+                    searchResultList.addAll(movies)
+                    _movieListFlow.emit(searchResultList.toList())
+                }
+                if (totalSearchResult == movies.size) _fullListLoaded.value = true
+            } catch (e: Exception) {
+                _errorFlow.emit(Unit)
+                Log.e(TAG, "Error while searching", e)
             }
-        } catch (e: Exception) {
-            _errorFlow.emit(Unit)
-            Log.e(TAG, "Error while searching", e)
+        } else {
+            _fullListLoaded.value = true
+            _movieListFlow.emit(searchResultList.toList())
         }
+
     }
 
     override suspend fun loadMovieInfo(id: Int) {
@@ -119,7 +130,7 @@ class RepositoryImpl @Inject constructor(
 
     private fun generatePremiereRange(): String {
         val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-        val startDate = LocalDate.now().withDayOfMonth(1)
+        val startDate = LocalDate.now().minusMonths(1).withDayOfMonth(1)
         val endDate = startDate.plusMonths(12).minusDays(1)
         return "${startDate.format(formatter)}-${endDate.format(formatter)}".also {
             Log.d(TAG, "Premiere range: $it")
@@ -129,6 +140,7 @@ class RepositoryImpl @Inject constructor(
     companion object {
 
         private const val INITIAL_PAGE = 1
+        private const val INITIAL_SIZE = 0
         private const val TAG = "RepositoryImpl"
     }
 }

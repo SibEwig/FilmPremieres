@@ -22,9 +22,11 @@ class MovieMapper @Inject constructor() {
         dto.trailerList?.trailers?.map { mapTrailerDtoToDomain(it) }
     )
 
-    private fun mapPremiereDtoDateToLocalDate(dto: PremiereDto): LocalDate {
+    private fun mapPremiereDtoDateToLocalDate(dto: PremiereDto?): LocalDate {
         val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        return LocalDate.parse(dto.date.substring(0, 10), dateFormatter)
+        val date = dto?.date?.substring(0, 10) ?: "1986-11-15"
+        return LocalDate.parse(date, dateFormatter)
+
     }
 
     fun mapFavouriteEntityToMovie(favouriteEntity: FavouriteEntity) = Movie(

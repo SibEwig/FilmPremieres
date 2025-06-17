@@ -2,6 +2,7 @@ package com.sibewig.filmpremieres.presentation
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -18,6 +19,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.sibewig.filmpremieres.R
 import com.sibewig.filmpremieres.databinding.ActivityMainBinding
 import com.sibewig.filmpremieres.domain.MainActivityState
+import com.sibewig.filmpremieres.domain.ScreenMode
 import com.sibewig.filmpremieres.presentation.adapters.MovieListItemAdapter
 import com.sibewig.filmpremieres.presentation.adapters.MovieListItemAdapter.Companion.VIEW_TYPE_HEADER
 import com.sibewig.filmpremieres.presentation.adapters.MovieListItemAdapter.Companion.VIEW_TYPE_MOVIE
@@ -34,8 +36,6 @@ class MainActivity : AppCompatActivity() {
     private val component by lazy {
         (application as FilmPremieresApp).component
     }
-
-    private var isFavouriteMode = false
 
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(binding.root)
         setUpRecyclerView()
-        setUpClickListeners()
+        setUpUiListeners()
         observeViewModelState()
     }
 
@@ -65,25 +65,16 @@ class MainActivity : AppCompatActivity() {
         binding.fabFavourites.visibility = visibility
     }
 
-    private fun setUpClickListeners() {
+    private fun setUpUiListeners() {
         with(binding) {
-            fabSearch.setOnClickListener {
-                viewModel.loadData()
-                fabSearch.visibility = View.GONE
-            }
             fabFavourites.setOnClickListener {
-                isFavouriteMode = !isFavouriteMode
-                viewModel.setFavouriteMode(isFavouriteMode)
-                if (isFavouriteMode) {
-                    viewModel.getFavouriteList()
-                } else {
-                    viewModel.loadData()
-                }
+                viewModel.setScreenMode(ScreenMode.FAVOURITES)
             }
             fabMain.setOnClickListener {
                 toggleFabMenu()
             }
             fabSearch.setOnClickListener {
+                toggleFabMenu()
                 searchView.visibility = View.VISIBLE
                 searchView.onActionViewExpanded()
                 searchView.postDelayed({
@@ -95,6 +86,9 @@ class MainActivity : AppCompatActivity() {
                     val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                     imm.showSoftInput(searchEditText, InputMethodManager.SHOW_IMPLICIT)
                 }, 150)
+            }
+            fabBack.setOnClickListener {
+                viewModel.setScreenMode(ScreenMode.MAIN)
             }
             searchView.setOnQueryTextListener(object : OnQueryTextListener {
 
@@ -110,7 +104,7 @@ class MainActivity : AppCompatActivity() {
                             Toast.LENGTH_SHORT
                         ).show()
                     } else {
-                        viewModel.searchMovie(query)
+                        viewModel.setScreenMode(ScreenMode.SEARCH, query)
                     }
                     return true
                 }
@@ -118,11 +112,33 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateFabVisibility(mode: ScreenMode) {
+        with(binding) {
+            when (mode) {
+                ScreenMode.MAIN -> {
+                    fabMain.visibility = View.VISIBLE
+                    fabBack.visibility = View.GONE
+                    searchView.visibility = View.GONE
+
+                }
+
+                else -> {
+                    fabMain.visibility = View.GONE
+                    fabFavourites.visibility = View.GONE
+                    fabSearch.visibility = View.GONE
+                    fabBack.visibility = View.VISIBLE
+                    isMenuOpen = false
+                }
+            }
+        }
+    }
+
     private fun observeViewModelState() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    viewModel.state.collect {
+                    viewModel.uiState.collect {
+                        Log.d(TAG, "Collected: $it")
                         when (it) {
                             is MainActivityState.Loading -> {
                                 binding.progressBar.isVisible = true
@@ -148,9 +164,30 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 launch {
-                    viewModel.fullListLoaded.collect {fullListLoaded ->
+                    viewModel.screenMode.collect { mode ->
+                        when (mode) {
+                            ScreenMode.MAIN -> {
+                                adapter.onReachEndListener = {
+                                    viewModel.loadNextPage()
+                                }
+                                delay(500)
+                                updateFabVisibility(mode)
+                            }
+
+                            ScreenMode.FAVOURITES, ScreenMode.SEARCH -> {
+                                adapter.onReachEndListener = null
+                                delay(500)
+                                updateFabVisibility(mode)
+
+                            }
+                        }
+                    }
+                }
+                launch {
+                    viewModel.fullListLoaded.collect { fullListLoaded ->
                         if (fullListLoaded) {
                             adapter.onReachEndListener = null
+                            Log.d(TAG, "onReachEndListener was set as null")
                         }
                     }
                 }
@@ -158,15 +195,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun setOnReachEndListener(mode: ScreenMode) {
+        when(mode) {
+            ScreenMode.MAIN -> {
+                adapter.onReachEndListener = {
+                    viewModel.loadNextPage()
+                }
+            }
+            else -> adapter.onReachEndListener = null
+        }
+    }
+
     private fun setUpRecyclerView() {
         val layoutManager = GridLayoutManager(this, 2)
         binding.recyclerViewMovie.adapter = adapter
         binding.recyclerViewMovie.layoutManager = layoutManager
-        adapter.onReachEndListener = {
-            viewModel.loadData()
-        }
         adapter.onItemClickListener = {
-            MovieDetailActivity.newIntent(this@MainActivity, it).also {intent ->
+            MovieDetailActivity.newIntent(this@MainActivity, it).also { intent ->
                 startActivity(intent)
             }
         }
@@ -178,13 +223,6 @@ class MainActivity : AppCompatActivity() {
                     else -> 1
                 }
             }
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (isFavouriteMode) {
-            viewModel.getFavouriteList()
         }
     }
 
